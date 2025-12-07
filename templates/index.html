@@ -5,18 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Financial Dashboard</title>
     <style>
-        /* Define our "Dark Mode" FinTech colour palette */
+        /* Colour variables (Dark Mode) */
         :root {
-            --bg-app: #000000;        /* Pure black background like T212 */
-            --bg-card: #121212;       /* Very dark gray for containers */
-            --brand-primary: #FFFFFF; /* Pure white text for headings */
-            --text-secondary: #A0A0A0;/* Light gray for subtitles/labels */
-            --brand-accent: #00B4F0;  /* Vibrant Cyan/Blue for accents */
-            --finance-red: #FF3B30;   /* Keep red for volatility risk */
-            --border-color: #2C2C2C;  /* Subtle dark borders */
+            --bg-app: #000000;
+            --bg-card: #121212;
+            --brand-primary: #FFFFFF;
+            --text-secondary: #A0A0A0;
+            --brand-accent: #00B4F0;
+            --finance-red: #FF3B30;
+            --border-color: #2C2C2C;
         }
 
-        /* Modern Reset and Font Stack */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-app);
@@ -29,18 +28,16 @@
             color: var(--brand-primary);
         }
 
-        /* The Main Card */
         .container {
             background-color: var(--bg-card);
             padding: 40px;
-            border-radius: 24px; /* Very round corners */
-            border: 1px solid var(--border-color); /* Subtle border definition */
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
             width: 90%;
             max-width: 850px;
             text-align: center;
         }
 
-        /* Headers */
         h1 {
             color: var(--brand-primary);
             font-weight: 800;
@@ -53,58 +50,12 @@
             margin-bottom: 40px;
             font-weight: 500;
         }
-
-        /* Highlight span for the ticker */
         .highlight-blue {
              color: var(--brand-accent);
              font-weight: 700;
         }
 
-        /* The Volatility Metric Box */
-        .metric-box {
-            background-color: var(--bg-card);
-            /* Darker border for dark mode */
-            border: 1px solid var(--border-color);
-            padding: 30px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-bottom: 40px;
-            min-width: 200px;
-        }
-        .metric-label {
-            font-size: 0.85em;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            color: var(--text-secondary);
-            font-weight: 600;
-        }
-        .metric-value {
-            font-size: 3.5em;
-            font-weight: 900;
-            /* Using the accent blue here, or could stick to red for risk */
-            color: var(--brand-accent);
-            margin: 15px 0 0 0;
-            line-height: 1;
-        }
-
-        /* The Chart ImageContainer */
-        .chart-container img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 16px;
-            /* A subtle glow effect instead of a shadow for dark mode */
-            box-shadow: 0 4px 20px rgba(0, 180, 240, 0.1);
-            border: 1px solid var(--border-color);
-        }
-
-        /* Footer */
-        .footer {
-            margin-top: 40px;
-            font-size: 0.85em;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-        /* Search Bar Styling */
+        /* Search Input */
         .search-container {
             margin-bottom: 30px;
         }
@@ -134,18 +85,58 @@
             transition: background 0.2s;
         }
         button:hover {
-            background-color: #009ACD; /* Slightly darker blue on hover */
+            background-color: #009ACD;
         }
 
-        /* Error Message Styling */
+        /* Error Display */
         .error-banner {
-            background-color: rgba(255, 59, 48, 0.1); /* Transparent red */
+            background-color: rgba(255, 59, 48, 0.1);
             border: 1px solid var(--finance-red);
             color: var(--finance-red);
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
             display: inline-block;
+        }
+
+        /* Metric Box */
+        .metric-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 40px;
+            min-width: 200px;
+        }
+        .metric-label {
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .metric-value {
+            font-size: 3.5em;
+            font-weight: 900;
+            color: var(--brand-accent);
+            margin: 15px 0 0 0;
+            line-height: 1;
+        }
+
+        .chart-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 180, 240, 0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            font-weight: 500;
         }
     </style>
 </head>
