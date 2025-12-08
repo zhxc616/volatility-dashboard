@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Financial Dashboard</title>
     <style>
-        /* Colour variables (Dark Mode) */
+        /* Colour variables */
         :root {
             --bg-app: #000000;
             --bg-card: #121212;
@@ -106,7 +106,7 @@
             padding: 30px;
             border-radius: 20px;
             display: inline-block;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             min-width: 200px;
         }
         .metric-label {
@@ -124,12 +124,40 @@
             line-height: 1;
         }
 
-        .chart-container img {
-            max-width: 100%;
-            height: auto;
+        /* Stats Grid  */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 0.75em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: var(--brand-primary);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            width: 100%;
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0, 180, 240, 0.1);
             border: 1px solid var(--border-color);
+            overflow: hidden;
         }
 
         .footer {
@@ -166,8 +194,27 @@
             <div class="metric-value">{{ "%.2f"|format(vol) }}%</div>
         </div>
 
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Sector</div>
+                <div class="stat-value">{{ info.sector }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Market Cap</div>
+                <div class="stat-value">{{ info.market_cap }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">P/E Ratio</div>
+                <div class="stat-value">{{ info.pe_ratio }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">52W High</div>
+                <div class="stat-value">{{ info.high_52 }}</div>
+            </div>
+        </div>
+
         <div class="chart-container">
-            <img src="data:image/png;base64,{{ chart }}" alt="Stock Chart">
+            {{ chart|safe }}
         </div>
         {% endif %}
 

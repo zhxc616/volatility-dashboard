@@ -2,11 +2,7 @@ import sqlite3
 import yfinance as yf
 import pandas as pd
 import numpy as np
-import matplotlib
-matplotlib.use('Agg')  # Backend for non-GUI server rendering
-import matplotlib.pyplot as plt
-import io
-import base64
+import plotly.graph_objects as go
 from sklearn.linear_model import LinearRegression
 from datetime import timedelta
 
@@ -45,14 +41,38 @@ def calculate_volatility(ticker):
     return daily_volatility * np.sqrt(252) * 100
 
 
+def get_company_info(ticker):
+    """
+    Fetches fundamental data for the Key Stats panel.
+    Returns a dictionary of formatted strings.
+    """
+    stock = yf.Ticker(ticker)
+    info = stock.info
+
+    # Helper to format large numbers
+    def format_market_cap(value):
+        if not value or value == "N/A": return "N/A"
+        if value >= 1e12: return f"${value / 1e12:.2f}T"
+        if value >= 1e9: return f"${value / 1e9:.2f}B"
+        if value >= 1e6: return f"${value / 1e6:.2f}M"
+        return f"${value}"
+
+    return {
+        "sector": info.get("sector", "N/A"),
+        "market_cap": format_market_cap(info.get("marketCap")),
+        "pe_ratio": f"{info.get('trailingPE', 0):.2f}" if info.get("trailingPE") else "N/A",
+        "high_52": f"${info.get('fiftyTwoWeekHigh', 0):.2f}" if info.get("fiftyTwoWeekHigh") else "N/A"
+    }
+
 def visualise_data(ticker):
     """
-    Generates a static plot with SMA, Bollinger Bands, and Linear Regression forecast.
-    Returns: Base64 encoded PNG string.
+    Generates an interactive Plotly chart with SMA, Bollinger Bands, and AI Forecast.
+    Returns: HTML string containing the interactive plot div.
     """
     with sqlite3.connect(DB_NAME) as conn:
         df = pd.read_sql(f"SELECT Date, Close FROM {ticker}_data", conn)
 
+    # 1. Prepare Data
     df['Date'] = pd.to_datetime(df['Date'], utc=True)
     df = df.sort_values('Date')
 
@@ -62,61 +82,73 @@ def visualise_data(ticker):
     df['Upper_Band'] = df['SMA_20'] + (df['Std_Dev'] * 2)
     df['Lower_Band'] = df['SMA_20'] - (df['Std_Dev'] * 2)
 
-    # --- Trend Forecasting (Linear Regression) ---
+    # --- AI Forecasting (Linear Regression) ---
     df['Date_Ordinal'] = df['Date'].apply(lambda x: x.toordinal())
 
     model = LinearRegression()
     model.fit(df[['Date_Ordinal']], df['Close'])
 
-    # Predict next 7 days
     last_date = df['Date'].iloc[-1]
     future_dates = [last_date + timedelta(days=i) for i in range(1, 8)]
     future_ordinals = [[d.toordinal()] for d in future_dates]
     predicted_prices = model.predict(future_ordinals)
 
-    # --- Plotting ---
-    # Define Dark Mode palette
-    bg_color = '#121212'
-    text_color = '#FFFFFF'
-    accent_color = '#00B4F0'
-    sma_color = '#FF9500'
-    band_color = '#333333'
-    grid_color = '#333333'
-    prediction_color = '#FFD700'
+    # --- Plotly Interactive Chart ---
+    fig = go.Figure()
 
-    fig, ax = plt.subplots(figsize=(10, 6))
-    fig.patch.set_facecolor(bg_color)
-    ax.set_facecolor(bg_color)
+    # 1. Bollinger Bands
+    fig.add_trace(go.Scatter(
+        x=df['Date'], y=df['Upper_Band'],
+        mode='lines', line=dict(width=0),
+        showlegend=False, hoverinfo='skip'
+    ))
+    fig.add_trace(go.Scatter(
+        x=df['Date'], y=df['Lower_Band'],
+        mode='lines', line=dict(width=0),
+        fill='tonexty', fillcolor='rgba(255, 255, 255, 0.05)',
+        name='Bollinger Bands', hoverinfo='skip'
+    ))
 
-    # Plot layers
-    ax.fill_between(df['Date'], df['Upper_Band'], df['Lower_Band'], color=band_color, alpha=0.3,
-                    label='Bollinger Bands (2σ)')
-    ax.plot(df['Date'], df['SMA_20'], label='20-Day SMA', color=sma_color, linestyle='-', linewidth=1.5, alpha=0.8)
-    ax.plot(df['Date'], df['Close'], label=f'{ticker} Price', color=accent_color, linewidth=2)
-    ax.plot(future_dates, predicted_prices, label='AI Forecast (7d)', color=prediction_color, linestyle='--',
-            linewidth=2)
+    # 2. SMA (Orange)
+    fig.add_trace(go.Scatter(
+        x=df['Date'], y=df['SMA_20'],
+        mode='lines', name='20-Day SMA',
+        line=dict(color='#FF9500', width=1.5)
+    ))
 
-    # Styling
-    ax.set_title(f'{ticker} Technical Analysis', color=text_color, weight='bold', pad=20)
-    ax.set_xlabel('Date', color=text_color, labelpad=10)
-    ax.set_ylabel('Price (USD)', color=text_color, labelpad=10)
+    # 3. Actual Price (Blue)
+    fig.add_trace(go.Scatter(
+        x=df['Date'], y=df['Close'],
+        mode='lines', name=f'{ticker} Price',
+        line=dict(color='#00B4F0', width=2)
+    ))
 
-    ax.tick_params(axis='x', colors=text_color)
-    ax.tick_params(axis='y', colors=text_color)
-    for spine in ax.spines.values():
-        spine.set_edgecolor(grid_color)
-    ax.grid(True, color=grid_color, linestyle='--', linewidth=0.5, alpha=0.7)
+    # 4. AI Forecast (Gold Dashed)
+    fig.add_trace(go.Scatter(
+        x=future_dates, y=predicted_prices,
+        mode='lines', name='7-Day AI Forecast',
+        line=dict(color='#FFD700', width=2, dash='dash')
+    ))
 
-    legend = ax.legend(loc='upper left', fontsize='small')
-    legend.get_frame().set_facecolor(bg_color)
-    legend.get_frame().set_edgecolor(grid_color)
-    for text in legend.get_texts():
-        text.set_color(text_color)
+    # Layout
+    fig.update_layout(
+        template='plotly_dark',
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        height=500,
+        margin=dict(l=20, r=20, t=40, b=20),
 
-    # Save to buffer
-    img = io.BytesIO()
-    plt.savefig(img, format='png', bbox_inches='tight', facecolor=fig.get_facecolor())
-    img.seek(0)
-    plt.close()
+        hovermode='x unified',
+        hoverlabel=dict(
+            bgcolor="#121212",
+            font_color="#FFFFFF",
+            bordercolor="#333333"
+        ),
 
-    return base64.b64encode(img.getvalue()).decode()
+        xaxis=dict(showgrid=True, gridcolor='#333333'),
+        yaxis=dict(showgrid=True, gridcolor='#333333', title='Price (USD)'),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+
+    # Return HTML string
+    return fig.to_html(full_html=False, include_plotlyjs='cdn', config={'displayModeBar': False})

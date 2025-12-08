@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from analysis import fetch_and_save_data, calculate_volatility, visualise_data
+from analysis import fetch_and_save_data, calculate_volatility, visualise_data, get_company_info
 
 app = Flask(__name__)
 
@@ -17,15 +17,19 @@ def dashboard():
 
     volatility = None
     chart_data = None
+    company_info = None
     error_msg = None
 
     try:
-        # Run ETL pipeline to update local database
+        # 1. Run ETL pipeline to update local database
         fetch_and_save_data(ticker)
 
-        # specific analytics and chart generation
+        # 2. Get specific analytics and chart generation
         volatility = calculate_volatility(ticker)
         chart_data = visualise_data(ticker)
+
+        # 3. Get Fundamentals (Key Stats)
+        company_info = get_company_info(ticker)
 
     except Exception as e:
         print(f"Error processing {ticker}: {e}")
@@ -35,6 +39,7 @@ def dashboard():
                            ticker=ticker,
                            vol=volatility,
                            chart=chart_data,
+                           info=company_info,
                            error=error_msg)
 
 
