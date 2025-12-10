@@ -12,11 +12,24 @@ DB_NAME = "financial_data.db"
 def fetch_and_save_data(ticker):
     """
     Fetches 1y historical data from Yahoo Finance and caches it in SQLite.
+    Raises ValueError if no data is found (e.g., invalid ticker).
     """
     stock = yf.Ticker(ticker)
-    df = stock.history(period="1y")
+
+    # auto_adjust=True fixes issues with some stock splits/dividends
+    df = stock.history(period="1y", auto_adjust=True)
+
+    # SAFETY CHECK 1: was data received
+    if df.empty:
+        raise ValueError(
+            f"Yahoo Finance returned no data for '{ticker}'. This might be an API issue or invalid symbol.")
 
     df.reset_index(inplace=True)
+
+    # SAFETY CHECK 2: does data contain what is needed
+    if 'Date' not in df.columns or 'Close' not in df.columns:
+        raise ValueError(f"Data format error for '{ticker}'. Missing Date or Close columns.")
+
     df = df[['Date', 'Close']]
 
     with sqlite3.connect(DB_NAME) as conn:
