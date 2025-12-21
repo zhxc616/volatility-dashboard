@@ -33,7 +33,7 @@ jobs:
 
     - name: 🔍 Run Linter (Flake8)
       # syntax errors
-      run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+      run: flake8 . --count --exclude .venv --select=E9,F63,F7,F82 --show-source --statistics
 
     - name: 🧪 Run Unit Tests
       # runs unit test file
