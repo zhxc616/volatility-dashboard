@@ -1,0 +1,54 @@
+name: CI Pipeline
+
+# trigger on push to main branch
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  # testing
+  quality-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v3
+
+    - name: 🐍 Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.12"
+
+    - name: 📦 Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install black flake8
+
+    - name: 🎨 Run Format Check (Black)
+      # incorrect format
+      run: black --check .
+
+    - name: 🔍 Run Linter (Flake8)
+      # syntax errors
+      run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+    - name: 🧪 Run Unit Tests
+      # runs unit test file
+      run: python -m unittest test_project.py
+
+  # docker build verification
+  # only runs if all code checks pass
+  docker-build:
+    needs: quality-check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v3
+
+    - name: 🐳 Build Docker Image
+      # proves the Dockerfile is valid and builds successfully
+      run: docker build -t volatility-dashboard .
