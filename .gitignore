@@ -2,4 +2,24 @@ infrastructure/.terraform/providers/registry.terraform.io/hashicorp/aws/6.27.0/w
 infrastructure/terraform.tfstate.backup
 infrastructure/terraform.tfstate
 .idea/vcs.xml
-.idea/vcs.xml
+# --- Python & Venv ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# --- IDE Settings (PyCharm/VS Code) ---
+.idea/
+.vscode/
+
+# --- Terraform & Infrastructure ---
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+*.pem
+
+# --- System Files ---
+.DS_Store
+Thumbs.db
