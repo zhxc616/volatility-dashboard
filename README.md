@@ -1,8 +1,13 @@
-# 📈 Financial Volatility & AI Prediction Dashboard
+# 📈 Financial Volatility & AI Forecasting Dashboard
 
-A full-stack financial analysis tool that visualizes market risks, calculates annualized volatility, and forecasts future price trends using Machine Learning (Linear Regression).
+[![Production CI Pipeline](https://github.com/zhxc616/volatility-dashboard/actions/workflows/ci_pipeline.yml/badge.svg)](https://github.com/zhxc616/volatility-dashboard/actions)
+[![Infrastructure](https://img.shields.io/badge/Infrastructure-Terraform-purple)](https://www.terraform.io/)
+[![Container](https://img.shields.io/badge/Container-Docker-blue)](https://www.docker.com/)
+[![Cloud](https://img.shields.io/badge/Cloud-AWS%20EC2-orange)](https://aws.amazon.com/)
 
-Hosted on **AWS EC2 (Ubuntu Linux)** using a production-grade **Gunicorn** server.
+A cloud-native financial analytics platform that ingests real-time market data, calculates risk metrics (Annualised Volatility, Bollinger Bands), and generates 7-day price forecasts using Machine Learning.
+
+Architected with a **DevOps-first approach**, utilizing **Docker** for containerisation, **Terraform** for Infrastructure as Code (IaC), and **GitHub Actions** for CI/CD automation.
 
 ### 📸 Interface Previews
 
@@ -10,7 +15,6 @@ Hosted on **AWS EC2 (Ubuntu Linux)** using a production-grade **Gunicorn** serve
 ![Dashboard View](dashboard-view.png)
 
 ![Dashboard Detail](dashboard-view2.png)
-
 
 ---
 
@@ -21,61 +25,90 @@ Hosted on **AWS EC2 (Ubuntu Linux)** using a production-grade **Gunicorn** serve
 * **Technical Analysis:** Automatically calculates 20-Day Simple Moving Averages (SMA) and Bollinger Bands.
 * **Fundamental Data:** Fetches real-time Market Cap, P/E Ratio, Sector, and 52-Week Highs via `yfinance`.
 * **Risk Analysis:** Computes annualized volatility scores to quantify asset risk.
-* **Resilient Error Handling:** robust ETL pipeline that handles missing data, delisted tickers, and API failures gracefully.
+* **Resilient Error Handling:** Robust ETL pipeline that handles missing data, delisted tickers, and API failures gracefully.
 
 ---
 
-## 🛠️ Tech Stack
+## 🏗️ Architecture & Tech Stack
 
-* **Frontend:** HTML5, CSS3 (Custom Dark Mode UI), Jinja2 Templating
-* **Backend:** Python 3.12, Flask
-* **Data & AI:** Pandas, NumPy, Scikit-Learn, SQLite
-* **Visualization:** Plotly.js (Interactive), Matplotlib (Legacy/Static)
-* **Infrastructure:** AWS EC2, Ubuntu Linux, Gunicorn, Systemd
+This project integrates modern software engineering practices with cloud infrastructure:
+
+* **Core Application:** Python 3.12, Flask, Pandas, NumPy.
+* **Machine Learning:** Scikit-Learn (Linear Regression for price forecasting).
+* **Visualisation:** Plotly.js (Interactive financial charting).
+* **Containerisation:** Docker (Multi-stage builds, isolated runtime).
+* **Infrastructure:** Terraform (Automated provisioning of AWS EC2 & Security Groups).
+* **CI/CD:** GitHub Actions (Automated Linting via Black/Flake8, Unit Testing, and Docker Build verification).
 
 ---
 
-## ⚙️ Installation (Run Locally)
+## ⚙️ Quick Start (Run Locally)
 
-Prerequisites: Python 3.10+ installed.
+Prerequisites: [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed.
 
 1.  **Clone the Repository**
     ```bash
-    git clone [https://github.com/zhxc616/volatility-dashboard.git](https://github.com/YOUR_USERNAME/volatility-dashboard.git)
+    git clone [https://github.com/zhxc616/volatility-dashboard.git](https://github.com/zhxc616/volatility-dashboard.git)
     cd volatility-dashboard
     ```
 
-2.  **Create Virtual Environment**
+2.  **Build & Run (One-Liner)**
     ```bash
-    # Windows
-    python -m venv venv
-    venv\Scripts\activate
-
-    # Mac/Linux
-    python3 -m venv venv
-    source venv/bin/activate
+    docker build -t volatility-dashboard . && docker run -p 5000:5000 volatility-dashboard
     ```
 
-3.  **Install Dependencies**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-4.  **Run the Application**
-    ```bash
-    python app.py
-    ```
-    Visit `http://127.0.0.1:5000` in your browser.
+3.  **Access the Dashboard**
+    Open [http://localhost:5000](http://localhost:5000) in your browser.
 
 ---
 
-## ☁️ Cloud Deployment (AWS)
+## ☁️ Production Deployment (AWS via Terraform)
 
-This application is designed to run on a headless Linux server.
-* **Instance:** AWS EC2 (t3.micro / Ubuntu 24.04 LTS)
-* **Security:** Configured via AWS Security Groups (Port 5000 allowed only for authorized IPs during dev).
-* **Server:** Gunicorn (Production WSGI) with 4 worker processes.
+This project uses **Infrastructure as Code** to provision and manage the production environment.
 
-**Production Launch Command:**
-```bash
-gunicorn -w 4 -b 0.0.0.0:5000 app:app
+**Prerequisites:**
+* **Terraform** installed.
+* **AWS Credentials** configured.
+* **SSH Key**
+
+### Deployment Steps
+
+1.  **Provision Infrastructure**
+    Navigate to the infrastructure directory to create the EC2 server and Security Groups:
+    ```bash
+    cd infrastructure
+    terraform init
+    terraform apply -auto-approve
+    ```
+    *Note the `server_public_ip` output*
+
+2.  **Deploy Application**
+    SSH into the new server and deploy the Docker container:
+    ```bash
+    ssh -i "/desktop/aws/.pemfile" ubuntu@<SERVER_IP>
+
+    # Inside the server:
+    git pull
+    docker stop $(docker ps -q) 2>/dev/null
+    docker build -t volatility-dashboard .
+    docker run -d -p 5000:5000 volatility-dashboard
+    ```
+
+3.  **Teardown (Stop Billing)**
+    To destroy the infrastructure and stop all costs:
+    ```bash
+    cd infrastructure
+    terraform destroy -auto-approve
+    ```
+
+---
+
+## 🤖 Continuous Integration (CI)
+
+Every commit to the `main` branch triggers the **Production CI Pipeline**, which performs:
+1.  **Linting:** Enforces code style using `black` and checks for syntax errors with `flake8`.
+2.  **Testing:** Runs unit tests (`test_project.py`) to verify data processing logic.
+3.  **Build Verification:** Attempts to build the Docker image to ensure the application is deployable.
+
+---
+
