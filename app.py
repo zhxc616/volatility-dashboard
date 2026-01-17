@@ -33,8 +33,6 @@ def dashboard():
         chart_data = visualise_data(ticker)
         company_info = get_company_info(ticker)
 
-        # Note: We are NO LONGER calculating volatility here.
-        # The JavaScript will ask for it separately!
 
     except Exception as e:
         print(f"Error processing {ticker}: {e}")
@@ -49,17 +47,17 @@ def dashboard():
     )
 
 
-# --- NEW API ROUTE FOR JAVASCRIPT ---
+# js api route
 @app.route("/api/get-volatility")
 def get_volatility_api():
-    # Get the ticker from the URL query (e.g., ?ticker=MSFT)
+    # get the ticker from the URL query
     ticker = request.args.get('ticker', 'AAPL')
 
     try:
-        # Calculate it on the fly
+        # calculation
         vol = calculate_volatility(ticker)
 
-        # Return pure JSON data
+        # return json data
         return jsonify({
             "ticker": ticker,
             "volatility": round(vol, 2)
