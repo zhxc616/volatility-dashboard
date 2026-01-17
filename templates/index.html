@@ -189,9 +189,9 @@
         {% if not error %}
         <p class="subtitle">Annualised Volatility Analysis for <span class="highlight-blue">{{ ticker }}</span></p>
 
-        <div class="metric-box">
+        <div class="metric-box" id="volatility-box" data-ticker="{{ ticker }}">
             <div class="metric-label">1-Year Risk Score (Vol)</div>
-            <div class="metric-value">{{ "%.2f"|format(vol) }}%</div>
+            <div class="metric-value" id="volatility-display">Loading...</div>
         </div>
 
         <div class="stats-grid">
@@ -222,6 +222,8 @@
             Data sourced via yfinance API. Processed via internal ETL pipeline.
         </div>
     </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 
 </body>
 </html>
