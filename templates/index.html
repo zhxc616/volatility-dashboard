@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Financial Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
-        /* Colour variables */
         :root {
             --bg-app: #000000;
             --bg-card: #121212;
@@ -15,7 +15,6 @@
             --finance-red: #FF3B30;
             --border-color: #2C2C2C;
         }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-app);
@@ -27,7 +26,6 @@
             min-height: 100vh;
             color: var(--brand-primary);
         }
-
         .container {
             background-color: var(--bg-card);
             padding: 40px;
@@ -37,135 +35,44 @@
             max-width: 850px;
             text-align: center;
         }
-
-        h1 {
-            color: var(--brand-primary);
-            font-weight: 800;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
-        }
-        p.subtitle {
-            color: var(--text-secondary);
-            font-size: 1.1em;
-            margin-bottom: 40px;
-            font-weight: 500;
-        }
-        .highlight-blue {
-             color: var(--brand-accent);
-             font-weight: 700;
-        }
+        h1 { margin-bottom: 8px; font-weight: 800; letter-spacing: -0.5px; }
+        p.subtitle { color: var(--text-secondary); margin-bottom: 40px; font-weight: 500; }
+        .highlight-blue { color: var(--brand-accent); font-weight: 700; }
 
         /* Search Input */
-        .search-container {
-            margin-bottom: 30px;
-        }
+        .search-container { margin-bottom: 30px; }
         input[type="text"] {
-            background-color: #1E1E1E;
-            border: 1px solid var(--border-color);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 1em;
-            width: 200px;
-            margin-right: 10px;
-            outline: none;
+            background-color: #1E1E1E; border: 1px solid var(--border-color);
+            color: white; padding: 12px 20px; border-radius: 8px; width: 200px; outline: none;
         }
-        input[type="text"]:focus {
-            border-color: var(--brand-accent);
-        }
+        input[type="text"]:focus { border-color: var(--brand-accent); }
         button {
-            background-color: var(--brand-accent);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-size: 1em;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s;
+            background-color: var(--brand-accent); color: white; border: none;
+            padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: 600;
         }
-        button:hover {
-            background-color: #009ACD;
-        }
-
-        /* Error Display */
-        .error-banner {
-            background-color: rgba(255, 59, 48, 0.1);
-            border: 1px solid var(--finance-red);
-            color: var(--finance-red);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: inline-block;
-        }
+        button:hover { background-color: #009ACD; }
 
         /* Metric Box */
         .metric-box {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 30px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-bottom: 30px;
-            min-width: 200px;
+            background-color: var(--bg-card); border: 1px solid var(--border-color);
+            padding: 30px; border-radius: 20px; display: inline-block;
+            margin-bottom: 30px; min-width: 200px;
         }
-        .metric-label {
-            font-size: 0.85em;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            color: var(--text-secondary);
-            font-weight: 600;
-        }
-        .metric-value {
-            font-size: 3.5em;
-            font-weight: 900;
-            color: var(--brand-accent);
-            margin: 15px 0 0 0;
-            line-height: 1;
-        }
+        .metric-label { font-size: 0.85em; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-secondary); }
+        .metric-value { font-size: 3.5em; font-weight: 900; color: var(--brand-accent); margin: 15px 0 0 0; line-height: 1; }
 
-        /* Stats Grid  */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        .stat-card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-        }
-        .stat-label {
-            font-size: 0.75em;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-        }
-        .stat-value {
-            font-size: 1.1em;
-            font-weight: 700;
-            color: var(--brand-primary);
-        }
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 15px; border-radius: 12px; }
+        .stat-label { font-size: 0.75em; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 5px; }
+        .stat-value { font-size: 1.1em; font-weight: 700; }
 
         /* Chart Container */
         .chart-container {
-            width: 100%;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 180, 240, 0.1);
-            border: 1px solid var(--border-color);
-            overflow: hidden;
+            width: 100%; border-radius: 16px; border: 1px solid var(--border-color);
+            overflow: hidden; height: 500px; /* Fixed height for Plotly */
         }
-
-        .footer {
-            margin-top: 40px;
-            font-size: 0.85em;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
+        .footer { margin-top: 40px; font-size: 0.85em; color: var(--text-secondary); }
     </style>
 </head>
 <body>
@@ -174,19 +81,12 @@
         <h1>Market Risks Overview</h1>
 
         <div class="search-container">
-            <form method="POST" action="/">
-                <input type="text" name="ticker" placeholder="Enter Ticker (e.g. MSFT)" value="{{ ticker }}" required>
+            <form id="search-form">
+                <input type="text" id="ticker-input" placeholder="Enter Ticker (e.g. MSFT)" value="{{ ticker }}" required>
                 <button type="submit">Analyse</button>
             </form>
         </div>
 
-        {% if error %}
-        <div class="error-banner">
-            <strong>Error:</strong> {{ error }}
-        </div>
-        {% endif %}
-
-        {% if not error %}
         <p class="subtitle">Annualised Volatility Analysis for <span class="highlight-blue">{{ ticker }}</span></p>
 
         <div class="metric-box" id="volatility-box" data-ticker="{{ ticker }}">
@@ -197,26 +97,24 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-label">Sector</div>
-                <div class="stat-value">{{ info.sector }}</div>
+                <div class="stat-value" id="stat-sector">...</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Market Cap</div>
-                <div class="stat-value">{{ info.market_cap }}</div>
+                <div class="stat-value" id="stat-market-cap">...</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">P/E Ratio</div>
-                <div class="stat-value">{{ info.pe_ratio }}</div>
+                <div class="stat-value" id="stat-pe">...</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">52W High</div>
-                <div class="stat-value">{{ info.high_52 }}</div>
+                <div class="stat-value" id="stat-high">...</div>
             </div>
         </div>
 
-        <div class="chart-container">
-            {{ chart|safe }}
-        </div>
-        {% endif %}
+        <div class="chart-container" id="chart-box">
+             </div>
 
     </div>
 
