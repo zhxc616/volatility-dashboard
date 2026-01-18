@@ -3,7 +3,7 @@ from analysis import (
     fetch_and_save_data,
     calculate_volatility,
     get_company_info,
-    get_chart_data_json
+    get_chart_data_json,
 )
 
 app = Flask(__name__)
@@ -24,9 +24,10 @@ def dashboard():
 
 # api endpoints
 
+
 @app.route("/api/get-volatility")
 def get_volatility_api():
-    ticker = request.args.get('ticker', 'AAPL')
+    ticker = request.args.get("ticker", "AAPL")
     try:
         fetch_and_save_data(ticker)
 
@@ -38,7 +39,7 @@ def get_volatility_api():
 
 @app.route("/api/get-stats")
 def get_stats_api():
-    ticker = request.args.get('ticker', 'AAPL')
+    ticker = request.args.get("ticker", "AAPL")
     try:
         fetch_and_save_data(ticker)
 
@@ -50,7 +51,7 @@ def get_stats_api():
 
 @app.route("/api/get-chart-data")
 def get_chart_data_api():
-    ticker = request.args.get('ticker', 'AAPL')
+    ticker = request.args.get("ticker", "AAPL")
     try:
         fetch_and_save_data(ticker)
 
@@ -61,4 +62,4 @@ def get_chart_data_api():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5000)

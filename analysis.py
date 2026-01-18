@@ -11,8 +11,8 @@ DB_NAME = "financial_data.db"
 
 def fetch_and_save_data(ticker):
 
-   # Fetches 1y historical data from Yahoo Finance and caches it in SQLite.
-   # Raises ValueError if no data is found (e.g., invalid ticker).
+    # Fetches 1y historical data from Yahoo Finance and caches it in SQLite.
+    # Raises ValueError if no data is found (e.g., invalid ticker).
 
     stock = yf.Ticker(ticker)
     df = stock.history(period="1y", auto_adjust=True)
@@ -37,7 +37,7 @@ def fetch_and_save_data(ticker):
 
 def calculate_volatility(ticker):
 
-    #annualised volatility calculation
+    # annualised volatility calculation
 
     with sqlite3.connect(DB_NAME) as conn:
         df = pd.read_sql(f"SELECT Date, Close FROM {ticker}_data", conn)
@@ -117,11 +117,11 @@ def get_chart_data_json(ticker):
         return [None if np.isnan(x) else x for x in data_list]
 
     return {
-        "dates": df["Date"].dt.strftime('%Y-%m-%d').tolist(),
+        "dates": df["Date"].dt.strftime("%Y-%m-%d").tolist(),
         "close": clean_nan(df["Close"].tolist()),
         "sma": clean_nan(df["SMA_20"].tolist()),
         "upper": clean_nan(df["Upper_Band"].tolist()),
         "lower": clean_nan(df["Lower_Band"].tolist()),
-        "forecast_dates": [d.strftime('%Y-%m-%d') for d in future_dates],
-        "forecast_prices": predicted_prices.tolist()
+        "forecast_dates": [d.strftime("%Y-%m-%d") for d in future_dates],
+        "forecast_prices": predicted_prices.tolist(),
     }
